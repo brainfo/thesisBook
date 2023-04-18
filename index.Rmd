@@ -11,7 +11,7 @@ url: brainfo.github.io/book
 description: |
   This is a minimal benchmark for analyzing snRNA-seq data.
 link-citations: yes
-github-repo: brainfo.github.com/thesisBook
+github-repo: https://github.com/brainfo/thesisBook
 ---
 
 # Preface
