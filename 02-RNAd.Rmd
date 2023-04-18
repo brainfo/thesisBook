@@ -1,6 +1,6 @@
 # RNA dynamics
 In this chapter, we deal with RNA dynamics inside nucleus.
-```{r diagram, include=TRUE, echo=FALSE}
+```{r kineticDiagram, include=TRUE, echo=FALSE}
 DiagrammeR::grViz("
   digraph graph2 {
   
@@ -27,7 +27,7 @@ DiagrammeR::grViz("
   [2]: 'unspliced RNA'
   [3]: 'spliced RNA'
   [4]: 'plasma'
-  [5]: '$\O$'
+  [5]: 'emptyset'
   ",
   height = 100)
 ```
