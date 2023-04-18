@@ -1,0 +1,81 @@
+--- 
+title: "snRNA-seq data analysis"
+author: "Hong Jiang"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+documentclass: book
+bibliography: packages.bib
+# bibliography: [book.bib, packages.bib]
+# url: your book url like https://bookdown.org/yihui/bookdown
+# cover-image: path to the social sharing image like images/cover.jpg
+description: |
+  This is a minimal benchmark for analyzing snRNA-seq data.
+link-citations: yes
+# github-repo: rstudio/bookdown-demo
+---
+
+# Preface
+
+This is a minimal __benchmark__ for analyzing snRNA-seq data, especially with scverse and bioconductor communities. It will be continuously updated throughout my PhD years.
+
+From my current experience:
+
+- bioconductor has more solid basement of biological (annotation) data
+- questions and methods to tackle them (except for dl) are usually first developed in R, then the python community would propose competing methods. Since seruat comes earlier than scanpy
+- the scanpy community evolves fast but somehow the developers are not considering better integrating each other's new features
+- packages in R is in general easier to use, though I personally is more used to python and could adapt more myself
+- R utils are too easily to crash with the same hardware facility, same data size and same kind of job
+
+## Comments on snRNA-seq vs scRNA-seq
+__advantages of snRNA-seq__: does not require the preservation of cellular integrity during sample preparation, especially dissociation.  
+
+__disadvantages of snRNA-seq__: loss of biological signal for genes with little nuclear localization.  
+
+__Interpretation of DE results__:
+
+1. assumption: nuclear abundances are a good proxy for the overall expression profile.
+2. considerations:
+    + transcripts for strongly expressed genes might localize to the cytoplasm for efficient translation and subsequently be lost upon stripping.
+    + genes with the same overall expression but differences in __the rate of nuclear export__ may appear to be differentially expressed between clusters.
+    + In the most pathological case, higher snRNA-seq abundances may indicate __nuclear sequestration__ of transcripts for protein-coding genes and reduced activity of the relevant biological process, __contrary to__ the usual interpretation of the effect of upregulation.
+  
+
+<!-- ## Usage  -->
+
+<!-- Each **bookdown** chapter is an .Rmd file, and each .Rmd file can contain one (and only one) chapter. A chapter *must* start with a first-level heading: `# A good chapter`, and can contain one (and only one) first-level heading. -->
+
+<!-- Use second-level and higher headings within chapters like: `## A short section` or `### An even shorter section`. -->
+
+<!-- The `index.Rmd` file is required, and is also your first book chapter. It will be the homepage when you render the book. -->
+
+<!-- ## Render book -->
+
+<!-- You can render the HTML version of this example book without changing anything: -->
+
+<!-- 1. Find the **Build** pane in the RStudio IDE, and -->
+
+<!-- 1. Click on **Build Book**, then select your output format, or select "All formats" if you'd like to use multiple formats from the same book source files. -->
+
+<!-- Or build the book from the R console: -->
+
+<!-- ```{r, eval=FALSE} -->
+<!-- bookdown::render_book() -->
+<!-- ``` -->
+
+<!-- To render this example to PDF as a `bookdown::pdf_book`, you'll need to install XeLaTeX. You are recommended to install TinyTeX (which includes XeLaTeX): <https://yihui.org/tinytex/>. -->
+
+<!-- ## Preview book -->
+
+<!-- As you work, you may start a local server to live preview this HTML book. This preview will update as you edit the book when you save individual .Rmd files. You can start the server in a work session by using the RStudio add-in "Preview book", or from the R console: -->
+
+<!-- ```{r eval=FALSE} -->
+<!-- bookdown::serve_book() -->
+<!-- ``` -->
+
+
+```{r include=FALSE}
+# automatically create a bib database for R packages
+knitr::write_bib(c(
+  .packages(), 'bookdown', 'knitr', 'rmarkdown'
+), 'packages.bib')
+```

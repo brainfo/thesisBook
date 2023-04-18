@@ -1,0 +1,30 @@
+# Empty droplets and Ambient contamination
+
+## Empty droplets
+An unique aspect of droplet-based data is that we have no prior knowledge about whether a particular library (i.e., cell barcode) corresponds to cell-containing or empty droplets. Thus, we need to call cells from empty droplets based on the observed expression profiles. This is not entirely straightforward as empty droplets can contain ambient (i.e., extracellular) RNA that can be captured and sequenced, resulting in non-zero counts for libraries that do not contain any cell.
+```{r diagram}
+DiagrammeR::grViz("
+  digraph graph2 {
+  
+  graph [layout = dot, rankdir = LR]
+  
+  # node definitions with substituted label text
+  node [shape = oval]
+  a [label = '@@1']
+  b [label = '@@2']
+  c [label = '@@3']
+  d [label = '@@4']
+  
+  a -> c
+  a -> d
+  b -> c
+  b -> d
+  }
+  
+  [1]: 'Cellbender'
+  [2]: 'emptyDrops'
+  [3]: 'controlAmbience'
+  [4]: 'cluster with empty drops'
+  ",
+  height = 100)
+```

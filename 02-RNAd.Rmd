@@ -1,0 +1,34 @@
+# RNA dynamics
+In this chapter, we deal with RNA dynamics inside nucleus.
+```{r diagram, include=TRUE, echo=FALSE}
+DiagrammeR::grViz("
+  digraph graph2 {
+  
+  graph [layout = dot, rankdir = LR]
+  
+  # node definitions with substituted label text
+  node [shape = oval]
+  a [label = '@@1']
+  b [label = '@@2']
+  c [label = '@@3']
+  d [label = '@@4']
+  e [label = '@@5']
+  
+  a -> b [label = 'Transcription']
+  b -> c [label = 'Splicing']
+  c -> d [label = 'Export']
+  c -> e [label = 'Decay']
+  b-> d[label = 'Export']
+  b -> e[label = 'Decay']
+
+  }
+  
+  [1]: 'dsDNA'
+  [2]: 'unspliced RNA'
+  [3]: 'spliced RNA'
+  [4]: 'plasma'
+  [5]: '$\O$'
+  ",
+  height = 100)
+```
+

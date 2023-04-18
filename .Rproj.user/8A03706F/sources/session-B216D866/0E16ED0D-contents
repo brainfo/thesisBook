@@ -1,0 +1,71 @@
+# Preprocess
+In this chapter, we deal with empty droplets, ambient RNAs and doublets, especially in snRNA-seq setting.
+```{r diagram, include=TRUE, echo=FALSE}
+DiagrammeR::grViz("
+  digraph graph2 {
+  
+  graph [layout = dot, rankdir = LR]
+  
+  # node definitions with substituted label text
+  node [shape = oval]
+  a [label = '@@1']
+  b [label = '@@2']
+  c [label = '@@3']
+  d [label = '@@4']
+  
+  a -> c
+  a -> d
+  b -> c
+  b -> d
+  }
+  
+  [1]: 'Cellbender'
+  [2]: 'emptyDrops'
+  [3]: 'controlAmbience'
+  [4]: 'enriched in empty drops'
+  ",
+  height = 100)
+```
+
+## Empty droplets
+We have no prior knowledge about whether a particular library (i.e., cell barcode) corresponds to cell-containing or empty droplets. Thus, we need to call cells from empty droplets based on the observed expression profiles. This is not entirely straightforward as empty droplets can contain ambient (i.e., extracellular) RNA that can be captured and sequenced, resulting in non-zero counts for libraries that do not contain any cell.
+The aim of empty droplets detection in most cases is to retains nucleus that would have been discarded by other threshold on total counts. Therefore, could use looser thresholds after this step.
+
+### Statistical Modeling
+Cell Ranger v3.0 and [DropletUtils](https://bioconductor.org/packages/release/bioc/html/DropletUtils.html) implemented utils to [distinguish empty droplets](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1662-y). The algorithm has three key steps:
+
+1. filter out genes with counts of zero for all barcodes
+2. estimate the profile of the ambient RNA pool (as gene count across barcodes with total counts < 100 in DropletUtils or estimate expected number of recovered cells by OrdMag alg. in Cellranger)
+3. test each barcode for deviations from this profile using a Dirichlet-multinomial model of UMI count sampling 
+    + Barcodes with significant deviations are considered to be genuine cells 
+    + Use a knee point filter to ensure that barcodes with large total counts are always retained
+
+Cellranger uses an `expected-cells` and DropUtils uses `by.rank` as initial "cells". But with the sample initial top number of cells, two implementations give slightly different retained cells. _And I don't get why this happens._  
+
+:::: {.infobox .notes data-latex="notes"}
+In cellranger 7.0, it estimates expected number of recovered cells by OrdMag alg. <span style="color: white;">But I didn't get to use this method.</span>  
+Cellranger doesn't explicitly tell what FDR cutoff it uses. But retained number of nucleus fell into the range between 0.001 to 0.05 of DropUtils.  
+DropUtils uses barcodes with total counts < 100 as initial empty drops, but this **failed** with the tested datasets, evident (e.g.) as in FDR distribution:
+
+::::
+
+### Deep Learning
+[Cellbender](https://cellbender.readthedocs.io/en/latest/) provides a deep generative model of background-contaminated counts. The model is used for learning the background RNA profile, distinguishing cell-containing droplets from empty ones, and retrieving background-free gene expression profiles.  
+The model schema and network representation can be found in [Figure 1g,h](https://www.biorxiv.org/content/10.1101/791699v2.full.pdf)  
+This method has been benchmarked with UMI counts threshold and DecontX but not DropletUtils
+
+### Could Cellbender retain more good nucleus?
+__YES__  
+I summarized the general stats from the above mentioned methods with three in-house 10x snRNA-seq data:
+
+:::: {.infobox .notes data-latex="notes"}
+Thresholds filtering is necessary and the most useful data clean method.  
+It doesn't matter whether by detecting outliers or just setting hard cut-offs.
+::::
+
+
+## Ambient contamination
+
+I tested the combinations of the aforementioned empty droplets and ambient RNA detection methods (See diagram) with our in-house data and I'm convinced that Cellbender and cluster-based methods are of advantage.  
+
+In snRNA-seq, mtRNAs are natural controllers for ambient RNAs and thus can be leveraged in benchmarking.

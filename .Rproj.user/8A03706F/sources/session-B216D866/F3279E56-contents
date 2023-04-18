@@ -1,0 +1,197 @@
+---
+title: "Human placenta sample information"
+author: "Hong Jiang"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    fig_caption: yes
+    theme:
+      bootswatch: sandstone
+      base_font:
+        "Arial"
+      code_font:
+        google: "JetBrains Mono"
+      progress-bar-bg: "orange"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, message = F, warning = F)
+```
+
+## load libaries
+```{r load, include=FALSE}
+suppressPackageStartupMessages({
+  library(ComplexHeatmap)
+  library(dplyr)
+  library(circlize)
+  library(plotly)
+  library(ggstatsplot)
+  library(ggplot2)
+})
+```
+
+## read in file
+```{r read, include=T}
+info <- read.csv('samples_2seq.csv', sep=';', dec = ',')
+```
+### clinical and pathological vairables
+```{r variables}
+pathology <- select(info, c(BMI, Baby.Weight, Baby.Height, CranialCircumference, Placenta.Weight, AWG_mother))
+
+scale.pathology <- scale(as.matrix(pathology), center = TRUE, scale = TRUE)
+```
+## Heatmap
+```{r heatmap, include=T}
+row_ha = rowAnnotation(
+  Sex = info$sex
+)
+
+row_right = rowAnnotation(
+  APGAR1 = anno_points(info$APGAR.1, gp = gpar(
+    col = ifelse(info$APGAR.1 > 8, "#88AB75", "#DE8F6E")
+  )),
+  APGAR5 = anno_points(info$APGAR.5, gp = gpar(
+    col = ifelse(info$APGAR.5 > 8, "#88AB75", "#DE8F6E")
+  ),)
+)
+
+
+col_fun = colorRamp2(c(-3, 0, 3), c("blue", "white", "orange"))
+pdf('full_anno.pdf', width=8, height=8)
+row_ha + rowAnnotation(block = anno_block(gp = gpar(
+  fill = c('#85B79D', '#B287A3', '#694873'),
+  col = NA
+)),
+width = unit(2, "mm")) + Heatmap(
+  scale.pathology,
+  name = "Measurement",
+  cluster_rows = F,
+  cluster_columns = T,
+  show_row_names = F,
+  show_column_names = T,
+  column_labels = colnames(scale.pathology),
+  col = col_fun,
+  row_split = info$Group,
+  row_title = NULL
+) + Heatmap(
+  info$Age,
+  name = "Age",
+  top_annotation = HeatmapAnnotation(summary = anno_summary(
+    gp = gpar(fill = c("#74B3CE", "#F7B801", "#F7717D")),
+    height = unit(2, "cm")
+  )),
+  col = colorRamp2(c(20, 27, 34), c("#BAFFDF", "#B2EDC5", "#9DC0BC")),
+  width = unit(10, "mm")
+) + Heatmap(
+  as.character(info$GA),
+  name = "GA",
+  top_annotation = HeatmapAnnotation(summary = anno_summary(height = unit(2, "cm"))),
+  width = unit(10, "mm")
+) + row_right
+dev.off()
+```
+## Variables
+```{r heatmap, include=T}
+ggplot(info, aes(BMI, Baby.Weight, colour = Group, size=GA)) + 
+  geom_point() +
+  scale_color_manual(values=c('#85B79D', '#B287A3', '#694873')) +
+  scale_size(range = c(5, 10)) +
+  theme_classic()
+ggsave('figures/selection.pdf')
+mycolors <- c("#74B3CE", "#F7B801", "#F7717D")
+info$color <- mycolors[as.numeric(as.factor(info$Group))]
+fig <- plot_ly(data=info, x=~BMI, y=~AWG_mother, z=~AWG_baby, type="scatter3d", mode="markers", color=~Group) %>%
+  layout(scene = list(xaxis = list(title = 'BMI'), 
+         yaxis = list(title = 'PWG (g/wk)'), zaxis = list(title = 'AWG (g/wk)'), legend = list(title=list(text='Group'))))
+fig
+
+set.seed(123)
+
+ggbetweenstats(
+  data = info,
+  x = Group,
+  y = `Baby.Weight`,
+  ylab = "Baby Wight (g)",
+  plot.type = 'box',
+  type = "nonparametric",
+  p.adjust.method = 'none',
+  centrality.point.args = list(size = 0, color = "darkred"),
+  point.args = list(position = ggplot2::position_jitterdodge(dodge.width = 0.6), alpha =
+    1, size = 5, stroke = 0, na.rm = TRUE),
+) + scale_color_manual(values=mycolors) + theme_classic()
+ggsave('Baby_weight_box.pdf')
+
+ggbetweenstats(
+  data = info,
+  x = Group,
+  y = Age,
+  ylab = "Pregnancy Age (yr)",
+  plot.type = 'box',
+  type = "nonparametric",
+  p.adjust.method = 'none',
+  centrality.point.args = list(size = 0, color = "darkred")
+) + scale_color_manual(values=mycolors) + theme_classic()
+ggsave('Age_box.pdf')
+
+ggbetweenstats(
+  data = info,
+  x = Group,
+  y = AWG_mother,
+  ylab = "Pregnancy Weight Gain (g/wk)",
+  plot.type = 'box',
+  type = "nonparametric",
+  p.adjust.method = 'none',
+  centrality.point.args = list(size = 0, color = "darkred")
+) + scale_color_manual(values=mycolors) + theme_classic()
+ggsave('PWG_box.pdf')
+
+ggbetweenstats(
+  data = info,
+  x = Group,
+  y = AWG_baby,
+  ylab = "Average Weight Gain (g/wk)",
+  plot.type = 'box',
+  type = "nonparametric",
+  p.adjust.method = 'none',
+  centrality.point.args = list(size = 0, color = "darkred")
+) + scale_color_manual(values=mycolors) + theme_classic()
+ggsave('AWG_box.pdf')
+
+ggscatterstats(
+  data  = info,
+  x     = BMI,
+  y     = Placenta.Weight,
+  point.args = list(size = 3, alpha = 1, stroke = 0, aes(colour = Group)),
+  ylab  = "Placenta Weight (g)",
+  type = 'nonparametric',
+  marginal = F,
+  smooth.line.args = list(colour = 'black', method = lm)
+) +  scale_color_manual(values=mycolors) + theme_classic()
+ggsave('BMI_placenta.pdf')
+```
+## Birth weight
+```{r heatmap, include=T}
+mycolors <- c("#74B3CE", "gray87", "#F7B801", "#F7717D")
+chile = read.csv('chilli_.tsv',sep = '\t')
+cohort = read.csv('cohort.txt', sep = '\t', dec = ',')
+all = merge(info, cohort, by.x='ID', by.y='Id', all.y=T)
+ggplot()+
+  geom_line(data=chile, mapping=aes(x=GA, y=Q10)) + geom_line(data=chile,mapping=aes(x=GA, y=Q90)) + 
+  geom_line(data=chile, mapping=aes(x=GA, y=Q25), linetype='longdash')+ geom_line(data=chile, mapping=aes(x=GA, y=Q75), linetype='longdash') +
+  theme_classic() +
+  geom_point(data=all, mapping=aes(x=Gestationalage..wk., y=Birthweight..g., color = ifelse(all$ID %in% info$ID, Group.x, 'Not selected'), size=BMI.y))+  scale_color_manual(values=mycolors)+ guides(color=guide_legend(title="Group"))
+ggsave('cohort_group.pdf')
+```
+## compostion
+```{r heatmap, include=T, fig.width=6, fig.height=3}
+require(pals)
+comp_shift = read.csv('../figures/compostional_shift.txt',sep = '\t')
+rownames(comp_shift) = comp_shift$X
+comp_shift$X <- NULL
+library(ComplexHeatmap)
+pdf('compostional_shift.pdf', width = 6, height=3)
+Heatmap(t(comp_shift), column_gap=5, col=colorRamp2(c(-2, 0, 2), c("dodgerblue4", "white", "red")), cluster_columns = F, show_column_names = T, cluster_rows = F)
+dev.off()
+```

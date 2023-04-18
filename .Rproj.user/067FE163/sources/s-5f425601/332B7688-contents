@@ -1,0 +1,12 @@
+Welcome! 
+
+This is a toy benchmarking for [scverse](https://scverse.org/) and [bioconductor](https://www.bioconductor.org/) community (or cross them) to analyze 10x single nuclei RNA-seq data. 
+
+This is from the main project of my PhD work.
+
+From my current experience:
+
+- bioconductor has more solid basement of biological (annotation) data
+- questions and methods to tackle them (except for dl) are usually first developmed in R, then the python community would propose competing methods. Since seruat comes earlier than scanpy
+- the scanpy community evolves fast but somehow the developers are not considering better integrating each other's new features
+- packages in R is in general easier to use, though I personally is more used to python and could adapt more myself

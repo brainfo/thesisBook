@@ -1,0 +1,1 @@
+"0","info <- read.csv('samples_2seq.csv', sep=';', dec = ',')"

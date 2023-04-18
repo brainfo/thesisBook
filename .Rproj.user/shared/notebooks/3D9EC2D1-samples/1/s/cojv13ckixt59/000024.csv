@@ -1,0 +1,10 @@
+"0","pdf('compostional_shift.pdf', width = 6, height=3)
+Heatmap(t(comp_shift), column_gap=5, col=colorRamp2(c(-2, 0, 2), c(""dodgerblue4"", ""white"", ""red"")), cluster_columns = F, show_column_names = T, cluster_rows = F)
+dev.off()
+"
+"1","null device "
+"1","
+"
+"1","          1 "
+"1","
+"
